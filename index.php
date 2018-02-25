@@ -104,8 +104,9 @@ else {
     $_SESSION["_seq_token_ttl"] = $response_parsed->expires_in;
     $_SESSION["_seq_last_refreshed_token_timestamp"] = date_timestamp_get( date_create() );
 
-    $response_json = getFilesMetadata();
-    require dirname(__FILE__) . '/result.php';
+    // $response_json = getFilesMetadata();
+    $access_token = getToken();
+    require dirname(__FILE__) . '/file-selecting/index.php';
   }
   else {
     exit('State argument mismatch.');
@@ -164,6 +165,8 @@ function getFilesMetadata() {
         'Authorization: Bearer ' . getToken(),
       ),
     ));
+    echo "third one PHP at " . curl_setopt_array . "<br>";
+
     $response = curl_exec($ch);
     curl_close($ch);
     $response_json = json_decode($response);

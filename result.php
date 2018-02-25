@@ -35,9 +35,7 @@
                 <th>File name</th>
             </tr></thead>
             <tbody>
-            <?php foreach ($response_json as $file) { ?>
-              <tr><td><?php print htmlspecialchars($file->Name . ': ' . $file->FriendlyDesc1 . ', ' . $file->FriendlyDesc2); ?></td></tr>
-            <?php } ?>
+          sdfdsfds
             </tbody>
         </table></div>
     </div></div>

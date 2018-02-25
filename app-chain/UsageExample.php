@@ -26,7 +26,7 @@
         }
     }
 
-    $chains = new AppChains("524a5ccbff7d47759d692c5bf10a04733cc0cb70", "api.sequencing.com");
+    $chains = new AppChains($_GET['token'], "api.sequencing.com");
 	
 	echo "Beacons\n";
 	/*$beaconResult = $chains->getPublicBeacon(1, 2, "A");
@@ -42,8 +42,10 @@
      * @param $chainsResult
      */
     printReport($chainsResult);
+    // echo "Study PHP at " . $_GET['chainid'] . "<br>";
+    // echo "Study PHP at " . $_GET['fileid'] . "<br>";
 
-    $chainsBatchResult = $chains->getBatchReport("StartAppBatch", array("Chain91" => "227682", "Chain88" => "227682"));
+    $chainsBatchResult = $chains->getBatchReport("StartAppBatch", array($_GET['chainid'] => $_GET['fileid']));
 
     foreach ($chainsBatchResult as $key => $value){
         echo "-> Chain ID:";

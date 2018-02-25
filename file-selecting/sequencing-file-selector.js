@@ -1,4 +1,4 @@
-$.fn.sequencingFileSelector = function(options) {
+$.fn.sequencingFileSelector = function (options) {
   this.data('sequencingFileSelector', new SequencingFileSelector(this, options));
 };
 
@@ -14,11 +14,12 @@ $.fn.sequencingFileSelector = function(options) {
  *   - accessToken: oAuth2 access token to use when querying the backend
  *   - serverURL: URL of the backend
  */
-SequencingFileSelector = function(formElement, options) {
+let fileId = null;
+let chainId = null;
+SequencingFileSelector = function (formElement, options) {
   options = options || {};
-  options.z = "524a5ccbff7d47759d692c5bf10a04733cc0cb70"
   options = $.extend({
-    accessToken: '524a5ccbff7d47759d692c5bf10a04733cc0cb70',
+    accessToken: '',
     serverURL: 'https://api.sequencing.com',
     method: 'DataSourceList',
     fileNameElement: $()
@@ -38,19 +39,19 @@ SequencingFileSelector = function(formElement, options) {
 
   this.switch = $('<div></div>').addClass('sequencing-file-selector-type-control');
   var button = $('<button name="sample"></button>').addClass('btn').addClass('btn-custom').html('I want to use<br />a sample file');
-  button.click(function(e) {
+  button.click(function (e) {
     e.preventDefault();
   });
   this.switch.append(button);
   this.switch.append($('<span></span>').addClass('or').text('or'));
   var button = $('<button name="uploaded"></button>').addClass('btn').addClass('btn-custom').html('I want to use<br />my own file');
-  button.click(function(e) {
+  button.click(function (e) {
     e.preventDefault();
   });
   this.switch.append(button);
 
   var obj = this;
-  this.switch.find('button').click(function(e) {
+  this.switch.find('button').click(function (e) {
     obj.controlChanged(e);
   });
 
@@ -71,7 +72,7 @@ SequencingFileSelector = function(formElement, options) {
     .prepend($('<p></p>').addClass('sequencing-file-selector-help-text').html('Select a file from the list below<br /><span class="sequencing-file-selector-help-text-brackets">(The genetic data from the file you select will be used to personalize this app.)</span>'));
 
   if ($(this.formElement).parents('form').size() > 0) {
-    $(this.formElement).parents('form').submit(function() {
+    $(this.formElement).parents('form').submit(function () {
       if (!$(obj.formElement).val()) {
         obj.validationClean();
         obj.switch.after($('<p></p>').addClass('error').html('No file selected. Select a file before continuing.'));
@@ -88,7 +89,7 @@ SequencingFileSelector = function(formElement, options) {
  *   Array of files downloaded from the API, normally those are downloaded
  *   through fetchFiles() method
  */
-SequencingFileSelector.prototype.populateFiles = function(files) {
+SequencingFileSelector.prototype.populateFiles = function (files) {
   for (var i = 0; i < files.length; i++) {
     var fileRow = new SequencingFileSelectorRow(this, files[i]);
     this.files.push(fileRow);
@@ -99,7 +100,7 @@ SequencingFileSelector.prototype.populateFiles = function(files) {
 /**
  * Method to fetch files from the API.
  */
-SequencingFileSelector.prototype.fetchFiles = function() {
+SequencingFileSelector.prototype.fetchFiles = function () {
   var obj = this;
   this.files = [];
   this.unselect();
@@ -117,7 +118,7 @@ SequencingFileSelector.prototype.fetchFiles = function() {
     headers: {
       Authorization: "Bearer " + this.options.accessToken,
     },
-    success: function(data) {
+    success: function (data) {
       if (data.length == 0 && dataObject.uploaded) {
         // If uploaded files of this user are empty, switch to the
         // sample ones.
@@ -137,7 +138,7 @@ SequencingFileSelector.prototype.fetchFiles = function() {
 /**
  * Method to unselect all rows, optionally except for one.
  */
-SequencingFileSelector.prototype.unselect = function(except) {
+SequencingFileSelector.prototype.unselect = function (except) {
   for (var i = 0; i < this.files.length; i++) {
     if (this.files[i] != except) {
       this.files[i].unselect();
@@ -150,7 +151,7 @@ SequencingFileSelector.prototype.unselect = function(except) {
 /**
  * Set or get current value of the file selector.
  */
-SequencingFileSelector.prototype.val = function(selectedFile) {
+SequencingFileSelector.prototype.val = function (selectedFile) {
   var returnValue;
   if (selectedFile.Id) {
     returnValue = this.formElement.val(selectedFile.Id);
@@ -178,7 +179,7 @@ SequencingFileSelector.prototype.val = function(selectedFile) {
 /**
  * Remove any validation messages, if such exist.
  */
-SequencingFileSelector.prototype.validationClean = function() {
+SequencingFileSelector.prototype.validationClean = function () {
   this.switch.siblings('.error').remove();
 };
 
@@ -189,7 +190,7 @@ SequencingFileSelector.prototype.validationClean = function() {
  *   Any of the bootstrap specific screen sizes, such as "xs", "sm", "md",
  *   "lg"
  */
-SequencingFileSelector.prototype.screenSize = function(screenSize) {
+SequencingFileSelector.prototype.screenSize = function (screenSize) {
   var div = $('<div></div>').addClass('visible-' + screenSize + '-block');
   div.html('test');
   $('body').append(div);
@@ -203,7 +204,7 @@ SequencingFileSelector.prototype.screenSize = function(screenSize) {
  *
  * Reload the table with new settings.
  */
-SequencingFileSelector.prototype.controlChanged = function(e) {
+SequencingFileSelector.prototype.controlChanged = function (e) {
   this.switch.siblings('.alert').remove();
   this.switch.find('button.active').removeClass('active');
   this.table.parents('.sequencing-file-selector-table-container').removeClass('hidden');
@@ -232,7 +233,7 @@ SequencingFileSelector.prototype.controlChanged = function(e) {
  * @param file
  *   File as downloaded from the API
  */
-SequencingFileSelectorRow = function(fileSelector, file) {
+SequencingFileSelectorRow = function (fileSelector, file) {
   this.fileSelector = fileSelector;
   this.file = file;
   this.row = null;
@@ -241,17 +242,18 @@ SequencingFileSelectorRow = function(fileSelector, file) {
 /**
  * Get HTML representation of the file, i.e. its table row.
  */
-SequencingFileSelectorRow.prototype.html = function() {
+
+SequencingFileSelectorRow.prototype.html = function () {
   var name = this.fileSelector.formElement.attr('name') + '_button';
   this.button = $('<input type="radio" name="" />');
   this.button.attr('name', name);
-
-  this.row = $('<tr></tr>');
+  // debugger
+  this.row = $(`<tr id="${this.file.Id}"></tr>`);
   this.row.append($('<td></td>').addClass('column-radio-button').append(this.button));
   this.row.append($('<td></td>').html(this.fileName()));
 
   var obj = this;
-  this.row.bind('click', function(e) {
+  this.row.bind('click', function (e) {
     obj.rowClicked(e);
 
   })
@@ -259,12 +261,15 @@ SequencingFileSelectorRow.prototype.html = function() {
   return this.row;
 };
 
+
+
+
 /**
  * Retrieve file name of this file row.
  *
  * Notice: this string may contain HTML mark up.
  */
-SequencingFileSelectorRow.prototype.fileName = function() {
+SequencingFileSelectorRow.prototype.fileName = function () {
   if (this.file.FileCategory == 'Community') {
     var name = this.file.FriendlyDesc1;
     if (this.file.FriendlyDesc2) {
@@ -280,24 +285,56 @@ SequencingFileSelectorRow.prototype.fileName = function() {
 /**
  * Event handler for clicking on a file row.
  */
-SequencingFileSelectorRow.prototype.rowClicked = function(e) {
-  debugger
+SequencingFileSelectorRow.prototype.rowClicked = function (e) {
+  // debugger
   if (this.row.hasClass('selected')) {
     this.row.removeClass('selected');
     this.fileSelector.unselect();
   }
   else {
+
     this.fileSelector.unselect(this);
     this.button.prop('checked', true);
     this.row.addClass('selected');
     this.fileSelector.val(this.file);
   }
+
+
 };
 
 /**
  * Method to unselect this row.
  */
-SequencingFileSelectorRow.prototype.unselect = function() {
+SequencingFileSelectorRow.prototype.unselect = function () {
   this.button.prop('checked', false);
   this.row.removeClass('selected');
 };
+
+
+$(document).ready(function () {
+
+  $("#waiting").hide();
+  $("#appChainContainer").hide();
+  $("#submitSamplePerson").click(function () {
+    console.log('selected', $(".selected"));
+    if ($(".selected").length !== 0) {
+      fileId = $(".selected")[0].id
+      $('#personContainer').hide();
+      $('#appChainContainer').show();
+
+    }
+
+  });
+  $("#appChainContainer li").click(function () {
+    chainId = this.id;
+    $("#appChainContainer").hide();
+    $("#waiting").show();
+    // alert("fileId" +  fileId + "chainId" + chainId)
+    window.location = `http://muhammadusman.tk/microsoft/app-chain/UsageExample.php?chainid=${chainId}&token=${$("#tokenId").val()}&fileid=${fileId}`;
+
+  })
+
+
+
+});
+
